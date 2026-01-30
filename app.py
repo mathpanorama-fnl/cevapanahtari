@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-# Veritabanı dosyasının tam yolunu belirleyelim
+# Veritabanı dosyasının yolu
 DB_PATH = 'sinav.db'
 
 def get_db_connection():
@@ -12,7 +12,7 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# Tablolar yoksa oluşturan fonksiyon
+# Tabloları kontrol eden ve oluşturan fonksiyon
 def check_db():
     conn = get_db_connection()
     c = conn.cursor()
@@ -25,7 +25,7 @@ def check_db():
 
 @app.route('/kurulum', methods=['GET', 'POST'])
 def kurulum():
-    check_db() # Sayfa açılırken tabloları kontrol et
+    check_db()
     if request.method == 'POST':
         sinav_adi = request.form.get('sinav_adi')
         tarih = request.form.get('tarih')
@@ -44,7 +44,7 @@ def kurulum():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    check_db() # Tabloları kontrol et
+    check_db()
     conn = get_db_connection()
     sinav = conn.execute("SELECT * FROM ayarlar").fetchone()
     conn.close()
@@ -59,9 +59,14 @@ def index():
         
         dogru = 0
         yanlis = 0
+        
         for i, dogru_sik in enumerate(dogru_cevaplar):
             ogrenci_sikki = request.form.get(f'soru_{i+1}')
-            if ogrenci_sikki == dogru_sik:
+            
+            # BOŞ BIRAKMA KONTROLÜ
+            if ogrenci_sikki is None:
+                yanlis += 1 # Boşları yanlış sayar, istersen 0 da saydırabilirsin
+            elif ogrenci_sikki == dogru_sik:
                 dogru += 1
             else:
                 yanlis += 1
@@ -70,7 +75,7 @@ def index():
         conn.execute("INSERT INTO sonuclar VALUES (?, ?, ?, ?)", (ad_soyad, sinif, dogru, yanlis))
         conn.commit()
         conn.close()
-        return "Cevaplarınız kaydedildi. Başarılar!"
+        return "Cevaplarınız başarıyla kaydedildi. Başarılar dileriz!"
 
     return render_template('ogrenci.html', sinav=sinav, soru_sayisi=len(sinav['cevaplar'].split(',')))
 
