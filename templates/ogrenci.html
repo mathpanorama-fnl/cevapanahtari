@@ -3,34 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sınav Giriş Ekranı</title>
+    <title>{{ sinav['sinav_adi'] }} - Sınav Girişi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .exam-card { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 50px; }
+        .question-box { background: #fff; border: 1px solid #dee2e6; border-radius: 10px; padding: 15px; margin-bottom: 20px; transition: 0.3s; }
+        .question-box:hover { border-color: #0d6efd; box-shadow: 0 2px 10px rgba(13,110,253,0.1); }
+        .btn-check:checked + .btn-outline-primary { background-color: #0d6efd; color: white; }
+    </style>
 </head>
 <body class="container mt-4">
-    <div class="text-center p-3 bg-light rounded shadow-sm mb-4">
-        <h2 class="text-primary">{{ sinav['sinav_adi'] }}</h2>
-        <p class="text-muted">{{ sinav['tarih'] }}</p>
+
+    <div class="exam-card text-center mb-4">
+        <h2 class="text-primary fw-bold">{{ sinav['sinav_adi'] }}</h2>
+        <p class="text-muted border-top pt-2">{{ sinav['tarih'] }}</p>
     </div>
 
-    <form method="POST">
-        <div class="mb-3">
-            <input type="text" name="ad_soyad" class="form-control mb-2" placeholder="Adınız Soyadınız" required>
-            <input type="text" name="sinif" class="form-control" placeholder="Sınıfınız (Örn: 10-A)" required>
-        </div>
-        <hr>
-        {% for i in range(1, soru_sayisi + 1) %}
-        <div class="mb-4">
-            <p class="fw-bold">{{ i }}. Soru Cevabı:</p>
-            <div class="btn-group w-100" role="group">
-                {% for sik in ['A','B','C','D','E'] %}
-                <input type="radio" class="btn-check" name="soru_{{i}}" id="s{{i}}{{sik}}" value="{{sik}}">
-                <label class="btn btn-outline-primary" for="s{{i}}{{sik}}">{{sik}}</label>
-                {% endfor %}
+    <form method="POST" id="examForm">
+        <div class="exam-card mb-4">
+            <h5 class="mb-3 text-secondary">Öğrenci Bilgileri</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input type="text" name="ad_soyad" class="form-control form-control-lg" placeholder="Adınız Soyadınız" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <input type="text" name="sinif" class="form-control form-control-lg" placeholder="Sınıfınız (Örn: 10-A Motor)" required>
+                </div>
             </div>
         </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-success btn-lg w-100 mb-5">Sınavı Tamamla</button>
-    </form>
-</body>
-</html>
 
+        <div class="exam-card">
+            <h5 class="mb-4 text-secondary">Sorular (Boş bırakmak için işaretleme yapmayınız)</h5>
+            {% for i in range(1, soru_sayisi + 1) %}
+            <div class="question-box">
+                <p class="fw-bold mb-3">{{ i }}. Soru:</p>
+                <div class="btn-group w-100" role="group">
+                    {% for sik in ['A','B','C','D','E'] %}
+                    <input type="radio" class="btn-check" name="soru_{{i}}" id="q{{i}}{{sik}}" value="{{sik}}">
+                    <label class="btn btn-outline-primary py-2" for="q{{i}}{{sik}}">{{sik}}</label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+            
+            <button type="submit" id="submitBtn" class="btn btn-success btn-lg w-100 mt-4 p-3 fw-bold">SINAVI TAMAMLA</button>
+        </div>
+    </form>
+
+    <script>
+        const form = document.getElementById('examForm');
