@@ -1,117 +1,61 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=Windows-1254">
-<meta name=Generator content="Microsoft Word 15 (filtered)">
-<style>
-<!--
- /* Font Definitions */
- @font-face
-	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;}
-@font-face
-	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
- /* Style Definitions */
- p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:8.0pt;
-	margin-left:0cm;
-	line-height:107%;
-	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;}
-.MsoChpDefault
-	{font-size:11.0pt;
-	font-family:"Calibri",sans-serif;}
-.MsoPapDefault
-	{margin-bottom:8.0pt;
-	line-height:107%;}
-@page WordSection1
-	{size:595.3pt 841.9pt;
-	margin:70.85pt 70.85pt 70.85pt 70.85pt;}
-div.WordSection1
-	{page:WordSection1;}
--->
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SÄ±nav SonuÃ§ Listesi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { background-color: white; padding: 30px; border-radius: 15px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        @media print { .btn { display: none; } } /* YazdÄ±rÄ±rken butonlarÄ± gizle */
+    </style>
 </head>
+<body class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Ã–ÄŸrenci SÄ±nav SonuÃ§larÄ±</h2>
+        <div>
+            <button onclick="window.print()" class="btn btn-primary">Listeyi YazdÄ±r / PDF Yap</button>
+            <a href="/kurulum" class="btn btn-outline-danger btn-sm">Yeni SÄ±nav Kur</a>
+        </div>
+    </div>
 
-<body lang=TR style='word-wrap:break-word'>
+    <table class="table table-hover table-bordered text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>Ad Soyad</th>
+                <th>SÄ±nÄ±f</th>
+                <th>DoÄŸru SayÄ±sÄ±</th>
+                <th>YanlÄ±ÅŸ SayÄ±sÄ±</th>
+                <th>BaÅŸarÄ± (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for satir in veriler %}
+            <tr>
+                <td class="text-start">{{ satir['ad_soyad'] }}</td>
+                <td>{{ satir['sinif'] }}</td>
+                <td class="text-success fw-bold">{{ satir['dogru'] }}</td>
+                <td class="text-danger fw-bold">{{ satir['yanlis'] }}</td>
+                <td>
+                    {% set toplam = satir['dogru'] + satir['yanlis'] %}
+                    {% if toplam > 0 %}
+                        % {{ ((satir['dogru'] / toplam) * 100) | round(1) }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-<div class=WordSection1>
+    {% if not veriler %}
+    <div class="alert alert-warning text-center"> HenÃ¼z kayÄ±tlÄ± bir Ã¶ÄŸrenci sonucu bulunamadÄ±. </div>
+    {% endif %}
 
-<p class=MsoNormal>&lt;!DOCTYPE html&gt;</p>
-
-<p class=MsoNormal>&lt;html&gt;</p>
-
-<p class=MsoNormal>&lt;head&gt;</p>
-
-<p class=MsoNormal>    &lt;title&gt;Sınav Sonuç Listesi&lt;/title&gt;</p>
-
-<p class=MsoNormal>    &lt;link
-href=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css&quot;
-rel=&quot;stylesheet&quot;&gt;</p>
-
-<p class=MsoNormal>&lt;/head&gt;</p>
-
-<p class=MsoNormal>&lt;body class=&quot;container mt-5&quot;&gt;</p>
-
-<p class=MsoNormal>    &lt;h2 class=&quot;mb-4&quot;&gt;Öğrenci Sınav
-Sonuçları&lt;/h2&gt;</p>
-
-<p class=MsoNormal>    &lt;table class=&quot;table table-striped
-table-bordered&quot;&gt;</p>
-
-<p class=MsoNormal>        &lt;thead class=&quot;table-dark&quot;&gt;</p>
-
-<p class=MsoNormal>            &lt;tr&gt;</p>
-
-<p class=MsoNormal>                &lt;th&gt;Ad Soyad&lt;/th&gt;</p>
-
-<p class=MsoNormal>                &lt;th&gt;Sınıf&lt;/th&gt;</p>
-
-<p class=MsoNormal>                &lt;th&gt;Doğru Sayısı&lt;/th&gt;</p>
-
-<p class=MsoNormal>                &lt;th&gt;Yanlış Sayısı&lt;/th&gt;</p>
-
-<p class=MsoNormal>            &lt;/tr&gt;</p>
-
-<p class=MsoNormal>        &lt;/thead&gt;</p>
-
-<p class=MsoNormal>        &lt;tbody&gt;</p>
-
-<p class=MsoNormal>            {% for satir in veriler %}</p>
-
-<p class=MsoNormal>            &lt;tr&gt;</p>
-
-<p class=MsoNormal>                &lt;td&gt;{{ satir[0] }}&lt;/td&gt;</p>
-
-<p class=MsoNormal>                &lt;td&gt;{{ satir[1] }}&lt;/td&gt;</p>
-
-<p class=MsoNormal>                &lt;td class=&quot;text-success
-fw-bold&quot;&gt;{{ satir[2] }}&lt;/td&gt;</p>
-
-<p class=MsoNormal>                &lt;td class=&quot;text-danger
-fw-bold&quot;&gt;{{ satir[3] }}&lt;/td&gt;</p>
-
-<p class=MsoNormal>            &lt;/tr&gt;</p>
-
-<p class=MsoNormal>            {% endfor %}</p>
-
-<p class=MsoNormal>        &lt;/tbody&gt;</p>
-
-<p class=MsoNormal>    &lt;/table&gt;</p>
-
-<p class=MsoNormal>    &lt;button onclick=&quot;window.print()&quot;
-class=&quot;btn btn-secondary&quot;&gt;Listeyi Yazdır / PDF Yap&lt;/button&gt;</p>
-
-<p class=MsoNormal>&lt;/body&gt;</p>
-
-<p class=MsoNormal>&lt;/html&gt;</p>
-
-</div>
-
+    <div class="mt-4 text-muted small">
+        * Not: Bu liste veritabanÄ±na kaydedilen en gÃ¼ncel verileri gÃ¶sterir.
+    </div>
 </body>
-
 </html>
