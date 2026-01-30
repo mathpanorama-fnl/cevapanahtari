@@ -23,7 +23,7 @@
             <p class="fw-bold">{{ i }}. Soru Cevabı:</p>
             <div class="btn-group w-100" role="group">
                 {% for sik in ['A','B','C','D','E'] %}
-                <input type="radio" class="btn-check" name="soru_{{i}}" id="s{{i}}{{sik}}" value="{{sik}}" required>
+                <input type="radio" class="btn-check" name="soru_{{i}}" id="s{{i}}{{sik}}" value="{{sik}}">
                 <label class="btn btn-outline-primary" for="s{{i}}{{sik}}">{{sik}}</label>
                 {% endfor %}
             </div>
@@ -33,3 +33,4 @@
     </form>
 </body>
 </html>
+
