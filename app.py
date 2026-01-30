@@ -1,11 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
+import os
 
 app = Flask(__name__)
 
-# Veritabanını hazırla
-def init_db():
-    conn = sqlite3.connect('sinav.db')
+# Veritabanı dosyasının tam yolunu belirleyelim
+DB_PATH = 'sinav.db'
+
+def get_db_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# Tablolar yoksa oluşturan fonksiyon
+def check_db():
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS ayarlar 
                  (sinav_adi TEXT, tarih TEXT, cevaplar TEXT)''')
@@ -16,38 +25,37 @@ def init_db():
 
 @app.route('/kurulum', methods=['GET', 'POST'])
 def kurulum():
+    check_db() # Sayfa açılırken tabloları kontrol et
     if request.method == 'POST':
         sinav_adi = request.form.get('sinav_adi')
         tarih = request.form.get('tarih')
         soru_sayisi = int(request.form.get('soru_sayisi'))
-        # Cevapları virgülle ayrılmış string olarak tutalım (Örn: A,B,C,D...)
         cevaplar = ",".join([request.form.get(f'cevap_{i}') for i in range(1, soru_sayisi + 1)])
         
-        conn = sqlite3.connect('sinav.db')
+        conn = get_db_connection()
         c = conn.cursor()
-        c.execute("DELETE FROM ayarlar") # Eski sınavı temizle
+        c.execute("DELETE FROM ayarlar")
         c.execute("INSERT INTO ayarlar VALUES (?, ?, ?)", (sinav_adi, tarih, cevaplar))
         conn.commit()
         conn.close()
-        return "Sınav başarıyla kuruldu! Öğrenciler artık giriş yapabilir."
+        return "Sınav başarıyla kuruldu! <a href='/'>Giriş Sayfasına Git</a>"
     
     return render_template('kurulum.html')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    conn = sqlite3.connect('sinav.db')
-    c = conn.cursor()
-    sinav = c.execute("SELECT * FROM ayarlar").fetchone()
+    check_db() # Tabloları kontrol et
+    conn = get_db_connection()
+    sinav = conn.execute("SELECT * FROM ayarlar").fetchone()
     conn.close()
 
     if not sinav:
-        return "Henüz kurulu bir sınav bulunamadı."
+        return "Henüz sınav kurulmadı. Lütfen önce <a href='/kurulum'>Buraya Tıklayarak</a> sınavı kurun."
 
     if request.method == 'POST':
-        # Öğrenci cevaplarını al ve kontrol et
         ad_soyad = request.form.get('ad_soyad')
         sinif = request.form.get('sinif')
-        dogru_cevaplar = sinav[2].split(',')
+        dogru_cevaplar = sinav['cevaplar'].split(',')
         
         dogru = 0
         yanlis = 0
@@ -58,16 +66,22 @@ def index():
             else:
                 yanlis += 1
         
-        # Veritabanına kaydet
-        conn = sqlite3.connect('sinav.db')
-        c = conn.cursor()
-        c.execute("INSERT INTO sonuclar VALUES (?, ?, ?, ?)", (ad_soyad, sinif, dogru, yanlis))
+        conn = get_db_connection()
+        conn.execute("INSERT INTO sonuclar VALUES (?, ?, ?, ?)", (ad_soyad, sinif, dogru, yanlis))
         conn.commit()
         conn.close()
-        return "Cevaplarınız başarıyla kaydedildi. Başarılar dileriz!"
+        return "Cevaplarınız kaydedildi. Başarılar!"
 
-    return render_template('ogrenci.html', sinav=sinav, soru_sayisi=len(sinav[2].split(',')))
+    return render_template('ogrenci.html', sinav=sinav, soru_sayisi=len(sinav['cevaplar'].split(',')))
+
+@app.route('/sonuclar-paneli')
+def sonuclar_paneli():
+    check_db()
+    conn = get_db_connection()
+    veriler = conn.execute("SELECT * FROM sonuclar").fetchall()
+    conn.close()
+    return render_template('sonuclar.html', veriler=veriler)
 
 if __name__ == '__main__':
-    init_db()
+    check_db()
     app.run(debug=True)
